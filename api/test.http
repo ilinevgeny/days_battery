@@ -1,0 +1,8 @@
+# 1. Установите REST Client из маркетплейса Cursor
+# 2. Создайте тестовый .http файл:
+
+### Test
+GET https://jsonplaceholder.typicode.com/users/1
+
+# 3. Нажмите "Send Request" над строкой ###
+# 4. Убедитесь, что работает

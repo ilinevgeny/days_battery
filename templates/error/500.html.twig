@@ -1,0 +1,125 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}500 - Server Error - Daily Battery{% endblock %}
+
+{% block inline_styles %}
+{{ parent() }}
+
+.error-card {
+    background: white;
+    border-radius: 20px;
+    padding: 60px 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+.error-icon {
+    font-size: 120px;
+    margin-bottom: 30px;
+    opacity: 0.9;
+}
+
+.error-code {
+    font-size: 72px;
+    font-weight: 700;
+    color: #f56565;
+    margin-bottom: 20px;
+    line-height: 1;
+}
+
+.error-title {
+    font-size: 32px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.error-message {
+    font-size: 16px;
+    color: #6c757d;
+    margin-bottom: 40px;
+    line-height: 1.6;
+}
+
+.error-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-block;
+    padding: 14px 32px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 16px;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+    background: #f8f9fa;
+    color: #333;
+    border: 2px solid #e9ecef;
+}
+
+.btn-secondary:hover {
+    background: #e9ecef;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 480px) {
+    .error-card {
+        padding: 40px 20px;
+    }
+
+    .error-icon {
+        font-size: 80px;
+    }
+
+    .error-code {
+        font-size: 56px;
+    }
+
+    .error-title {
+        font-size: 24px;
+    }
+
+    .error-actions {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}
+{% endblock %}
+
+{% block body %}
+<div class="error-card">
+    <div class="error-icon">⚠️</div>
+    <div class="error-code">500</div>
+    <h1 class="error-title">Something Went Wrong</h1>
+    <p class="error-message">
+        We're sorry, but something went wrong on our end. Please try again later.
+    </p>
+    <div class="error-actions">
+        <a href="/" class="btn btn-primary">Go to Home</a>
+        <a href="javascript:location.reload()" class="btn btn-secondary">Try Again</a>
+    </div>
+</div>
+{% endblock %}

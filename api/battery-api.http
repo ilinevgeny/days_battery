@@ -1,0 +1,110 @@
+### Variables
+@baseUrl = http://localhost:8081
+@username = testuser
+@capacityHours = 12
+
+### 1. Claim Username (Create User)
+# @name claimUsername
+POST {{baseUrl}}/api/claim
+Content-Type: application/json
+
+{
+  "username": "{{username}}"
+}
+
+### Extract session cookie and publicHash from response
+@sessionCookie = {{claimUsername.response.headers.Set-Cookie}}
+@publicHash = {{claimUsername.response.body.$.data.publicHash}}
+
+### 2. Start Battery Session
+# @name startSession
+POST {{baseUrl}}/api/battery/start
+Cookie: {{sessionCookie}}
+
+### 3. Get Battery Status
+# @name getStatus
+GET {{baseUrl}}/api/battery/status
+Cookie: {{sessionCookie}}
+
+### 4. Stop Battery Session
+# @name stopSession
+POST {{baseUrl}}/api/battery/stop
+Cookie: {{sessionCookie}}
+
+### 5. Get Battery Status After Stop
+GET {{baseUrl}}/api/battery/status
+Cookie: {{sessionCookie}}
+
+### 6. Update Battery Settings
+# @name updateSettings
+PATCH {{baseUrl}}/api/battery/settings
+Cookie: {{sessionCookie}}
+Content-Type: application/json
+
+{
+  "capacityHours": {{capacityHours}}
+}
+
+### 7. Get Status After Settings Update
+GET {{baseUrl}}/api/battery/status
+Cookie: {{sessionCookie}}
+
+### 8. View Public Battery (No Auth Required)
+# Note: Replace with actual publicHash from claim response
+GET {{baseUrl}}/api/battery/public/{{publicHash}}
+
+### 9. Error: Try to claim existing username
+POST {{baseUrl}}/api/claim
+Content-Type: application/json
+
+{
+  "username": "{{username}}"
+}
+
+### 10. Error: Start session twice
+POST {{baseUrl}}/api/battery/start
+Cookie: {{sessionCookie}}
+
+### 11. Error: Stop session twice
+POST {{baseUrl}}/api/battery/stop
+Cookie: {{sessionCookie}}
+
+### 12. Error: Invalid username (too short)
+POST {{baseUrl}}/api/claim
+Content-Type: application/json
+
+{
+  "username": "ab"
+}
+
+### 13. Error: Invalid username (special characters)
+POST {{baseUrl}}/api/claim
+Content-Type: application/json
+
+{
+  "username": "test@user!"
+}
+
+### 14. Error: Invalid capacity (too low)
+PATCH {{baseUrl}}/api/battery/settings
+Cookie: {{sessionCookie}}
+Content-Type: application/json
+
+{
+  "capacityHours": 0
+}
+
+### 15. Error: Invalid capacity (too high)
+PATCH {{baseUrl}}/api/battery/settings
+Cookie: {{sessionCookie}}
+Content-Type: application/json
+
+{
+  "capacityHours": 25
+}
+
+### 16. Error: Access without authentication
+GET {{baseUrl}}/api/battery/status
+
+### 17. Error: Non-existent public hash
+GET {{baseUrl}}/api/battery/public/nonexistenthash123456789012345678

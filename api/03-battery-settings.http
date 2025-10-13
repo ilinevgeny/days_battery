@@ -1,0 +1,62 @@
+### Battery Settings
+# Update battery capacity (1-24 hours)
+# Note: Requires authentication
+
+@baseUrl = http://localhost:8081
+@sessionCookie = PHPSESSID=fd8d1ab17c4933af9f2400eaa13f9504
+
+### Update Battery Capacity to 8 hours
+PATCH {{baseUrl}}/api/battery/settings
+Cookie: {{sessionCookie}}
+Content-Type: application/json
+
+{
+  "capacityHours": 8
+}
+
+### Response:
+# {
+#   "success": true,
+#   "message": "Battery settings updated"
+# }
+
+###
+
+### Update Battery Capacity to 12 hours
+PATCH {{baseUrl}}/api/battery/settings
+Cookie: {{sessionCookie}}
+Content-Type: application/json
+
+{
+  "capacityHours": 16
+}
+
+###
+
+### Update Battery Capacity to 24 hours
+PATCH {{baseUrl}}/api/battery/settings
+Cookie: {{sessionCookie}}
+Content-Type: application/json
+
+{
+  "capacityHours": 24
+}
+
+###
+
+### Verify Settings Changed
+GET {{baseUrl}}/api/battery/status
+Cookie: {{sessionCookie}}
+
+### Response example:
+# {
+#   "success": true,
+#   "data": {
+#     "capacity": 28800,  // 8 hours in seconds
+#     "totalUsed": 17,
+#     "remaining": 28783,
+#     "percentage": 99.94,
+#     "isActive": false,
+#     "currentSessionStartedAt": null
+#   }
+# }

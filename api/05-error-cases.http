@@ -1,0 +1,142 @@
+### Error Cases Testing
+# Test various validation and error scenarios
+
+@baseUrl = http://localhost:8081
+@sessionCookie = PHPSESSID=your_session_id_here
+@existingUsername = testuser
+
+### ERROR 409: Username already taken
+POST {{baseUrl}}/api/claim
+Content-Type: application/json
+
+{
+  "username": "{{existingUsername}}"
+}
+
+### Response:
+# {
+#   "success": false,
+#   "error": "Username \"testuser\" is already taken"
+# }
+
+###
+
+### ERROR 422: Username too short (min 3 characters)
+POST {{baseUrl}}/api/claim
+Content-Type: application/json
+
+{
+  "username": "ab"
+}
+
+### Response:
+# HTTP 422 Unprocessable Content
+# "This value is too short. It should have 3 characters or more."
+
+###
+
+### ERROR 422: Username too long (max 32 characters)
+POST {{baseUrl}}/api/claim
+Content-Type: application/json
+
+{
+  "username": "this_username_is_way_too_long_for_validation_rules"
+}
+
+###
+
+### ERROR 422: Username with invalid characters
+POST {{baseUrl}}/api/claim
+Content-Type: application/json
+
+{
+  "username": "test@user!"
+}
+
+### Response:
+# HTTP 422 Unprocessable Content
+# "Username can only contain letters, numbers, underscores and hyphens"
+
+###
+
+### ERROR 422: Invalid capacity (too low)
+PATCH {{baseUrl}}/api/battery/settings
+Cookie: {{sessionCookie}}
+Content-Type: application/json
+
+{
+  "capacityHours": 0
+}
+
+### Response:
+# HTTP 422 Unprocessable Content
+# "This value should be between 1 and 24."
+
+###
+
+### ERROR 422: Invalid capacity (too high)
+PATCH {{baseUrl}}/api/battery/settings
+Cookie: {{sessionCookie}}
+Content-Type: application/json
+
+{
+  "capacityHours": 25
+}
+
+###
+
+### ERROR 401: Not authenticated
+GET {{baseUrl}}/api/battery/status
+
+### Response:
+# {
+#   "success": false,
+#   "error": "Not authenticated"
+# }
+
+###
+
+### ERROR 409: Battery already active
+# First start the battery, then try to start again
+POST {{baseUrl}}/api/battery/start
+Cookie: {{sessionCookie}}
+
+###
+
+POST {{baseUrl}}/api/battery/start
+Cookie: {{sessionCookie}}
+
+### Response:
+# {
+#   "success": false,
+#   "error": "Battery session is already active"
+# }
+
+###
+
+### ERROR 409: Battery not active
+# First stop the battery, then try to stop again
+POST {{baseUrl}}/api/battery/stop
+Cookie: {{sessionCookie}}
+
+###
+
+POST {{baseUrl}}/api/battery/stop
+Cookie: {{sessionCookie}}
+
+### Response:
+# {
+#   "success": false,
+#   "error": "Battery session is not active"
+# }
+
+###
+
+### ERROR 404: Non-existent public hash
+GET {{baseUrl}}/api/battery/public/nonexistenthash123456789012345678
+
+### Response:
+# {
+#   "success": false,
+#   "error": "Battery not found"
+# }

@@ -1,0 +1,46 @@
+
+###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/
+/vendor/
+###< symfony/framework-bundle ###
+
+###> phpunit/phpunit ###
+/phpunit.xml
+/.phpunit.cache/
+###< phpunit/phpunit ###
+
+###> symfony/asset-mapper ###
+/public/assets/
+/assets/vendor/
+###< symfony/asset-mapper ###
+
+###> friendsofphp/php-cs-fixer ###
+/.php-cs-fixer.php
+/.php-cs-fixer.cache
+###< friendsofphp/php-cs-fixer ###
+
+# Custom additions
+.env
+.symfony/
+node_modules/
+.idea/
+.vscode/
+.DS_Store
+*.log
+*.sql
+phpstan-baseline.neon
+
+# IDE directories
+.vscode/
+.claude/
+
+# Docker
+docker-compose.override.yml
+
+# Test files
+/tmp/

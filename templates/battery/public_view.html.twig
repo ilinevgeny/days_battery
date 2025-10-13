@@ -1,0 +1,231 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ battery.username }}'s Battery - Daily Battery{% endblock %}
+
+{% block inline_styles %}
+{{ parent() }}
+
+.battery-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.battery-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.battery-header h1 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.battery-header .username {
+    font-weight: 700;
+    color: #667eea;
+}
+
+.battery-status {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.battery-status.active {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.battery-status.inactive {
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+.battery-visual {
+    margin: 40px 0;
+}
+
+.battery-icon {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    height: 150px;
+    margin: 0 auto;
+    background: #e9ecef;
+    border: 4px solid #333;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.battery-icon::after {
+    content: '';
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 50px;
+    background: #333;
+    border-radius: 0 5px 5px 0;
+}
+
+.battery-fill {
+    height: 100%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+    position: relative;
+}
+
+.battery-fill.high {
+    background: linear-gradient(90deg, #48bb78 0%, #38a169 100%);
+}
+
+.battery-fill.medium {
+    background: linear-gradient(90deg, #f6ad55 0%, #ed8936 100%);
+}
+
+.battery-fill.low {
+    background: linear-gradient(90deg, #fc8181 0%, #f56565 100%);
+}
+
+.battery-percentage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 32px;
+    font-weight: 700;
+    color: #333;
+    z-index: 10;
+    text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+    pointer-events: none;
+}
+
+.battery-info {
+    margin-top: 30px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.info-value {
+    color: #333;
+    font-weight: 600;
+}
+
+.battery-footer {
+    margin-top: 40px;
+    text-align: center;
+}
+
+.btn-create {
+    display: inline-block;
+    padding: 14px 32px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 16px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-create:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+}
+
+.last-updated {
+    margin-top: 20px;
+    text-align: center;
+    color: #6c757d;
+    font-size: 13px;
+}
+
+@media (max-width: 480px) {
+    .battery-card {
+        padding: 30px 20px;
+    }
+
+    .battery-header h1 {
+        font-size: 24px;
+    }
+
+    .battery-icon {
+        height: 120px;
+    }
+
+    .battery-percentage {
+        font-size: 24px;
+    }
+}
+{% endblock %}
+
+{% block body %}
+<div class="battery-card">
+    <div class="battery-header">
+        <h1>
+            <span class="username">{{ battery.username }}</span>'s Battery
+        </h1>
+        <span class="battery-status {{ battery.isActive ? 'active' : 'inactive' }}">
+            {{ battery.isActive ? '⚡ Active' : '💤 Inactive' }}
+        </span>
+    </div>
+
+    <div class="battery-visual">
+        <div class="battery-icon">
+            {% set fillClass = battery.percentage >= 50 ? 'high' : (battery.percentage >= 20 ? 'medium' : 'low') %}
+            <div class="battery-fill {{ fillClass }}" style="width: {{ battery.percentage }}%"></div>
+            <span class="battery-percentage">{{ battery.percentage|number_format(1) }}%</span>
+        </div>
+    </div>
+
+    <div class="battery-info">
+        <div class="info-row">
+            <span class="info-label">Total Capacity</span>
+            <span class="info-value">{{ (battery.capacitySeconds / 3600)|number_format(0) }}h</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Time Used</span>
+            <span class="info-value">
+                {% set hours = (battery.totalUsedSeconds / 3600)|number_format(0) %}
+                {% set minutes = ((battery.totalUsedSeconds % 3600) / 60)|number_format(0) %}
+                {{ hours }}h {{ minutes }}m
+            </span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Time Remaining</span>
+            <span class="info-value">
+                {% set hours = (battery.remainingSeconds / 3600)|number_format(0) %}
+                {% set minutes = ((battery.remainingSeconds % 3600) / 60)|number_format(0) %}
+                {{ hours }}h {{ minutes }}m
+            </span>
+        </div>
+    </div>
+
+    <div class="battery-footer">
+        <a href="/" class="btn-create">Create Your Own Battery</a>
+        <div class="last-updated">
+            Last updated: {{ battery.lastUpdated|date('M d, Y H:i') }}
+        </div>
+    </div>
+</div>
+{% endblock %}

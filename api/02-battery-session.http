@@ -1,0 +1,66 @@
+### Battery Session Flow
+# Start and stop battery timer
+# Note: You must claim username first (01-claim-user.http)
+
+@baseUrl = http://localhost:8081
+@sessionCookie = PHPSESSID=fd8d1ab17c4933af9f2400eaa13f9504
+
+### Start Battery Session
+POST {{baseUrl}}/api/battery/start
+Cookie: {{sessionCookie}}
+
+### Response:
+# {
+#   "success": true,
+#   "message": "Battery session started"
+# }
+
+###
+
+### Get Current Status (Active)
+GET {{baseUrl}}/api/battery/status
+Cookie: {{sessionCookie}}
+
+### Response example:
+# {
+#   "success": true,
+#   "data": {
+#     "capacity": 57600,
+#     "totalUsed": 0,
+#     "remaining": 57596,
+#     "percentage": 99.99,
+#     "isActive": true,
+#     "currentSessionStartedAt": "2025-10-12T08:40:15+00:00"
+#   }
+# }
+
+###
+
+### Stop Battery Session
+POST {{baseUrl}}/api/battery/stop
+Cookie: {{sessionCookie}}
+
+### Response:
+# {
+#   "success": true,
+#   "message": "Battery session stopped"
+# }
+
+###
+
+### Get Status After Stop
+GET {{baseUrl}}/api/battery/status
+Cookie: {{sessionCookie}}
+
+### Response example:
+# {
+#   "success": true,
+#   "data": {
+#     "capacity": 57600,
+#     "totalUsed": 17,
+#     "remaining": 57583,
+#     "percentage": 99.97,
+#     "isActive": false,
+#     "currentSessionStartedAt": null
+#   }
+# }

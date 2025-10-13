@@ -1,0 +1,25 @@
+### Claim Username - Create User and Battery
+# This creates a new user with a unique username and initializes their daily battery
+# Returns: userId, username, publicHash
+# Sets: session cookie for authentication
+
+@baseUrl = http://localhost:8081
+
+### Claim new username
+# @name claim
+POST {{baseUrl}}/api/claim
+Content-Type: application/json
+
+{
+  "username": "Ev_Monday"
+}
+
+### Response example:
+# {
+#   "success": true,
+#   "data": {
+#     "userId": "5f32eb83-b0ea-4ba5-8948-b150e43c0c38",
+#     "username": "myusername",
+#     "publicHash": "e3ea302904fefccb63c551d360b25f47"
+#   }
+# }
