@@ -29,7 +29,7 @@ final readonly class GetBatteryStatusHandler
 
         return new BatteryStatusDTO(
             capacitySeconds: $battery->getCapacity()->toSeconds(),
-            totalUsedSeconds: $battery->getTotalUsedSeconds(),
+            totalUsedSeconds: $battery->getCurrentUsedSeconds(),
             remainingSeconds: $battery->getRemainingSeconds(),
             percentage: $battery->getPercentage(),
             isActive: $battery->isActive(),

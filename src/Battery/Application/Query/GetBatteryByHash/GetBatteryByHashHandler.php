@@ -37,7 +37,7 @@ final readonly class GetBatteryByHashHandler
         return new PublicBatteryDTO(
             username: $user->getUsername()->toString(),
             capacitySeconds: $battery->getCapacity()->toSeconds(),
-            totalUsedSeconds: $battery->getTotalUsedSeconds(),
+            totalUsedSeconds: $battery->getCurrentUsedSeconds(),
             remainingSeconds: $battery->getRemainingSeconds(),
             percentage: $battery->getPercentage(),
             isActive: $battery->isActive(),

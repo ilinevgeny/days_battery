@@ -3,7 +3,7 @@
 # Note: You must claim username first (01-claim-user.http)
 
 @baseUrl = http://localhost:8081
-@sessionCookie = PHPSESSID=fd8d1ab17c4933af9f2400eaa13f9504
+@sessionCookie = PHPSESSID=849757cf0bf97d9f7b32a414ec62de6f
 
 ### Start Battery Session
 POST {{baseUrl}}/api/battery/start

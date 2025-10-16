@@ -1,0 +1,580 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard - Daily Battery{% endblock %}
+
+{% block inline_styles %}
+{{ parent() }}
+
+.dashboard-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.user-info h2 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.user-info .username {
+    color: #667eea;
+    font-weight: 700;
+}
+
+.logout-btn {
+    padding: 10px 20px;
+    background: #f8f9fa;
+    color: #6c757d;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.logout-btn:hover {
+    background: #e9ecef;
+}
+
+.battery-status {
+    margin-bottom: 30px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.status-badge.active {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-badge.inactive {
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+.battery-visual {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    height: 150px;
+    margin: 0 auto 20px;
+    background: #e9ecef;
+    border: 4px solid #333;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.battery-visual::after {
+    content: '';
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 50px;
+    background: #333;
+    border-radius: 0 5px 5px 0;
+}
+
+.battery-fill {
+    height: 100%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+    position: relative;
+}
+
+.battery-fill.high {
+    background: linear-gradient(90deg, #48bb78 0%, #38a169 100%);
+}
+
+.battery-fill.medium {
+    background: linear-gradient(90deg, #f6ad55 0%, #ed8936 100%);
+}
+
+.battery-fill.low {
+    background: linear-gradient(90deg, #fc8181 0%, #f56565 100%);
+}
+
+.battery-percentage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 32px;
+    font-weight: 700;
+    color: #333;
+    z-index: 10;
+    text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+}
+
+.battery-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.stat {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+}
+
+.control-buttons {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.btn {
+    flex: 1;
+    padding: 16px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.btn-start {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    color: white;
+}
+
+.btn-start:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(72, 187, 120, 0.4);
+}
+
+.btn-stop {
+    background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
+    color: white;
+}
+
+.btn-stop:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(252, 129, 129, 0.4);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.settings-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.settings-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.capacity-control {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.capacity-control label {
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.capacity-control input[type="number"] {
+    flex: 1;
+    padding: 10px 14px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.btn-update {
+    padding: 10px 24px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-update:hover {
+    background: #5568d3;
+}
+
+.share-section {
+    background: #f0f4ff;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.share-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.share-description {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 15px;
+}
+
+.share-link {
+    display: flex;
+    gap: 10px;
+}
+
+.share-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+}
+
+.btn-copy {
+    padding: 10px 24px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-copy:hover {
+    background: #5568d3;
+}
+
+.message {
+    display: none;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.message.show {
+    display: block;
+}
+
+.message.success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.message.error {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+@media (max-width: 768px) {
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .battery-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .control-buttons {
+        flex-direction: column;
+    }
+
+    .capacity-control {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .share-link {
+        flex-direction: column;
+    }
+}
+{% endblock %}
+
+{% block body %}
+<div class="dashboard-card">
+    <div class="dashboard-header">
+        <div class="user-info">
+            <h2>Welcome, <span class="username" id="username">...</span>!</h2>
+        </div>
+        <a href="/" class="logout-btn" onclick="return confirm('Are you sure you want to leave?')">Leave</a>
+    </div>
+
+    <div class="battery-status">
+        <span class="status-badge" id="statusBadge">Loading...</span>
+
+        <div class="battery-visual">
+            <div class="battery-fill" id="batteryFill" style="width: 0%"></div>
+            <span class="battery-percentage" id="batteryPercentage">0%</span>
+        </div>
+
+        <div class="battery-stats">
+            <div class="stat">
+                <div class="stat-label">Capacity</div>
+                <div class="stat-value" id="capacityStat">16h</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Used</div>
+                <div class="stat-value" id="usedStat">0h 0m</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Remaining</div>
+                <div class="stat-value" id="remainingStat">16h 0m</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="control-buttons">
+        <button class="btn btn-start" id="startBtn" onclick="startSession()">
+            ▶️ Start Timer
+        </button>
+        <button class="btn btn-stop" id="stopBtn" onclick="stopSession()" disabled>
+            ⏸️ Stop Timer
+        </button>
+    </div>
+
+    <div class="settings-section">
+        <div class="settings-title">⚙️ Battery Settings</div>
+        <form class="capacity-control" onsubmit="updateCapacity(event)">
+            <label>Daily Capacity:</label>
+            <input type="number" id="capacityInput" min="1" max="24" value="16" required>
+            <span style="color: #6c757d; font-size: 14px;">hours</span>
+            <button type="submit" class="btn-update">Update</button>
+        </form>
+        <div class="message" id="settingsMessage"></div>
+    </div>
+
+    <div class="share-section">
+        <div class="share-title">🔗 Share Your Battery</div>
+        <div class="share-description">Share this link to let others see your battery status</div>
+        <div class="share-link">
+            <input type="text" class="share-input" id="shareLink" readonly value="Loading...">
+            <button class="btn-copy" onclick="copyLink()">Copy Link</button>
+        </div>
+        <div class="message" id="copyMessage"></div>
+    </div>
+</div>
+
+<script>
+let updateInterval;
+
+async function loadStatus() {
+    try {
+        const response = await fetch('/api/battery/status');
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            window.location.href = '/';
+            return;
+        }
+
+        const battery = data.data;
+
+        // Update percentage and visual
+        const percentage = battery.percentage.toFixed(1);
+        document.getElementById('batteryPercentage').textContent = percentage + '%';
+
+        const fillEl = document.getElementById('batteryFill');
+        fillEl.style.width = percentage + '%';
+
+        // Update fill color
+        fillEl.className = 'battery-fill ' + (percentage >= 50 ? 'high' : percentage >= 20 ? 'medium' : 'low');
+
+        // Update status badge
+        const statusBadge = document.getElementById('statusBadge');
+        statusBadge.textContent = battery.isActive ? '⚡ Active' : '💤 Inactive';
+        statusBadge.className = 'status-badge ' + (battery.isActive ? 'active' : 'inactive');
+
+        // Update stats
+        const capacityHours = Math.floor(battery.capacity / 3600);
+        document.getElementById('capacityStat').textContent = capacityHours + 'h';
+
+        const usedHours = Math.floor(battery.totalUsed / 3600);
+        const usedMinutes = Math.floor((battery.totalUsed % 3600) / 60);
+        document.getElementById('usedStat').textContent = usedHours + 'h ' + usedMinutes + 'm';
+
+        const remainingHours = Math.floor(battery.remaining / 3600);
+        const remainingMinutes = Math.floor((battery.remaining % 3600) / 60);
+        document.getElementById('remainingStat').textContent = remainingHours + 'h ' + remainingMinutes + 'm';
+
+        // Update capacity input only if not focused (to allow user editing)
+        const capacityInput = document.getElementById('capacityInput');
+        if (document.activeElement !== capacityInput) {
+            capacityInput.value = capacityHours;
+        }
+
+        // Update buttons
+        document.getElementById('startBtn').disabled = battery.isActive;
+        document.getElementById('stopBtn').disabled = !battery.isActive;
+
+    } catch (error) {
+        console.error('Failed to load status:', error);
+    }
+}
+
+async function loadUserInfo() {
+    try {
+        const response = await fetch('/api/battery/status');
+        const data = await response.json();
+
+        if (data.success && data.data.userId) {
+            // Get public hash from storage or API
+            const claimResponse = await fetch('/api/battery/status');
+            if (claimResponse.ok) {
+                const statusData = await claimResponse.json();
+                // For now, we'll need to store publicHash in session when claiming
+                // Or add it to the status endpoint response
+            }
+        }
+    } catch (error) {
+        console.error('Failed to load user info:', error);
+    }
+}
+
+async function startSession() {
+    try {
+        const response = await fetch('/api/battery/start', { method: 'POST' });
+        const data = await response.json();
+
+        if (data.success) {
+            await loadStatus();
+        } else {
+            alert(data.error || 'Failed to start session');
+        }
+    } catch (error) {
+        alert('Network error. Please try again.');
+    }
+}
+
+async function stopSession() {
+    try {
+        const response = await fetch('/api/battery/stop', { method: 'POST' });
+        const data = await response.json();
+
+        if (data.success) {
+            await loadStatus();
+        } else {
+            alert(data.error || 'Failed to stop session');
+        }
+    } catch (error) {
+        alert('Network error. Please try again.');
+    }
+}
+
+async function updateCapacity(event) {
+    event.preventDefault();
+
+    const capacityHours = parseInt(document.getElementById('capacityInput').value);
+    const messageEl = document.getElementById('settingsMessage');
+
+    try {
+        const response = await fetch('/api/battery/settings', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ capacityHours })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            messageEl.textContent = '✓ Settings updated successfully!';
+            messageEl.className = 'message success show';
+            await loadStatus();
+        } else {
+            messageEl.textContent = '✗ ' + (data.error || 'Failed to update settings');
+            messageEl.className = 'message error show';
+        }
+    } catch (error) {
+        messageEl.textContent = '✗ Network error. Please try again.';
+        messageEl.className = 'message error show';
+    }
+
+    setTimeout(() => messageEl.classList.remove('show'), 3000);
+}
+
+function copyLink() {
+    const input = document.getElementById('shareLink');
+    const messageEl = document.getElementById('copyMessage');
+
+    input.select();
+    document.execCommand('copy');
+
+    messageEl.textContent = '✓ Link copied to clipboard!';
+    messageEl.className = 'message success show';
+
+    setTimeout(() => messageEl.classList.remove('show'), 2000);
+}
+
+// Initialize
+loadStatus();
+setInterval(loadStatus, 2000); // Update every 2 seconds
+
+// Load user data from session storage
+const username = sessionStorage.getItem('username');
+const publicHash = sessionStorage.getItem('publicHash');
+
+if (!username || !publicHash) {
+    // Redirect to home if no session data
+    window.location.href = '/';
+} else {
+    // Update username display
+    document.getElementById('username').textContent = username;
+
+    // Update share link
+    const shareUrl = window.location.origin + '/battery/' + publicHash;
+    document.getElementById('shareLink').value = shareUrl;
+}
+</script>
+{% endblock %}

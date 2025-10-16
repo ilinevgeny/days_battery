@@ -206,16 +206,16 @@
         <div class="info-row">
             <span class="info-label">Time Used</span>
             <span class="info-value">
-                {% set hours = (battery.totalUsedSeconds / 3600)|number_format(0) %}
-                {% set minutes = ((battery.totalUsedSeconds % 3600) / 60)|number_format(0) %}
+                {% set hours = (battery.totalUsedSeconds / 3600)|round(0, 'floor') %}
+                {% set minutes = ((battery.totalUsedSeconds % 3600) / 60)|round(0, 'floor') %}
                 {{ hours }}h {{ minutes }}m
             </span>
         </div>
         <div class="info-row">
             <span class="info-label">Time Remaining</span>
             <span class="info-value">
-                {% set hours = (battery.remainingSeconds / 3600)|number_format(0) %}
-                {% set minutes = ((battery.remainingSeconds % 3600) / 60)|number_format(0) %}
+                {% set hours = (battery.remainingSeconds / 3600)|round(0, 'floor') %}
+                {% set minutes = ((battery.remainingSeconds % 3600) / 60)|round(0, 'floor') %}
                 {{ hours }}h {{ minutes }}m
             </span>
         </div>
