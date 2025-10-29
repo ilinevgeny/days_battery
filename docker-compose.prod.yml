@@ -85,15 +85,16 @@ services:
     container_name: days_battery_postgres
     environment:
       POSTGRES_DB: days_battery
-      POSTGRES_USER: ${DB_USER:-app}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
+      POSTGRES_USER: app
+      # IMPORTANT: Change this password! Use the same password in .env.prod DATABASE_URL
+      POSTGRES_PASSWORD: ChangeMe_SecurePassword123
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-app}"]
+      test: ["CMD-SHELL", "pg_isready -U app"]
       interval: 30s
       timeout: 10s
       retries: 3

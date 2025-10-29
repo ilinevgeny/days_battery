@@ -72,8 +72,9 @@ APP_SECRET=<сгенерированный секрет>
 # URL приложения
 DEFAULT_URI=https://battery.yourdomain.com
 
-# Данные БД (замените на безопасные)
-DATABASE_URL="postgresql://prod_user:secure_password_here@postgres:5432/days_battery?serverVersion=16&charset=utf8"
+# Данные БД: Придумайте свой пароль и замените ChangeMe_SecurePassword123
+# Пользователь БД: app (не меняйте)
+DATABASE_URL="postgresql://app:ChangeMe_SecurePassword123@postgres:5432/days_battery?serverVersion=16&charset=utf8"
 ```
 
 ### Генерация APP_SECRET
@@ -83,6 +84,35 @@ php -r "echo bin2hex(random_bytes(32)) . PHP_EOL;"
 ```
 
 Скопируйте вывод в `APP_SECRET`.
+
+### Настройка пароля базы данных
+
+**Важно:** Пароль БД нужно указать в ДВУХ местах:
+
+1. **В `.env.prod.local`** (который вы сейчас редактируете) - в `DATABASE_URL`
+2. **В `docker-compose.prod.yml`** - в секции `postgres -> environment -> POSTGRES_PASSWORD`
+
+Откройте второй файл:
+
+```bash
+nano docker-compose.prod.yml
+```
+
+Найдите секцию `postgres` и замените пароль:
+
+```yaml
+postgres:
+  environment:
+    POSTGRES_DB: days_battery
+    POSTGRES_USER: app
+    POSTGRES_PASSWORD: ВАШ_ПАРОЛЬ_ЗДЕСЬ  # Используйте тот же пароль из DATABASE_URL
+```
+
+**Как это работает:**
+- Вы сами придумываете безопасный пароль
+- При первом запуске Docker создаст PostgreSQL с этим паролем
+- Приложение будет подключаться к БД используя пароль из `DATABASE_URL`
+- Пароли в обоих файлах должны совпадать!
 
 ## Шаг 4: Деплой
 

@@ -35,7 +35,16 @@ nano .env.prod.local
 - [ ] `LETSENCRYPT_EMAIL` - ваш email
 - [ ] `APP_SECRET` - сгенерировать: `php -r "echo bin2hex(random_bytes(32));"`
 - [ ] `DEFAULT_URI` - https://ваш-домен
-- [ ] `DATABASE_URL` - изменить пользователя и пароль БД
+- [ ] `DATABASE_URL` - придумать и указать безопасный пароль БД (пользователь: `app`)
+
+**Важно:** Тот же пароль БД нужно указать в `docker-compose.prod.yml`:
+
+```bash
+nano docker-compose.prod.yml
+# Найти секцию postgres -> POSTGRES_PASSWORD и указать тот же пароль
+```
+
+- [ ] Пароль БД изменен в `docker-compose.prod.yml` (совпадает с `DATABASE_URL`)
 
 ### 3. Деплой
 
