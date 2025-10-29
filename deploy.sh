@@ -10,6 +10,20 @@ NC='\033[0m' # No Color
 echo -e "${GREEN}🚀 Days Battery Deployment Script${NC}"
 echo "=================================="
 
+# Detect Docker Compose command (support both old and new syntax)
+if docker compose version &> /dev/null; then
+    DOCKER_COMPOSE="docker compose"
+    echo -e "${GREEN}✅ Detected: docker compose (Docker CLI plugin)${NC}"
+elif command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE="docker-compose"
+    echo -e "${GREEN}✅ Detected: docker-compose (standalone)${NC}"
+else
+    echo -e "${RED}❌ Error: Neither 'docker compose' nor 'docker-compose' found!${NC}"
+    echo "Please install Docker and Docker Compose first."
+    exit 1
+fi
+echo ""
+
 # Check if .env.prod exists
 if [ ! -f .env.prod ]; then
     echo -e "${RED}❌ Error: .env.prod file not found!${NC}"
@@ -45,7 +59,7 @@ echo ""
 
 # Stop existing containers if running
 echo -e "${YELLOW}🛑 Stopping existing containers...${NC}"
-docker compose -f docker-compose.prod.yml down || true
+$DOCKER_COMPOSE -f docker-compose.prod.yml down || true
 
 # Pull latest changes (if running from server)
 if [ -d .git ]; then
@@ -55,10 +69,10 @@ fi
 
 # Build and start containers
 echo -e "${YELLOW}🔨 Building Docker images...${NC}"
-docker compose -f docker-compose.prod.yml build --no-cache
+$DOCKER_COMPOSE -f docker-compose.prod.yml build --no-cache
 
 echo -e "${YELLOW}🚀 Starting containers...${NC}"
-docker compose -f docker-compose.prod.yml up -d
+$DOCKER_COMPOSE -f docker-compose.prod.yml up -d
 
 # Wait for services to be ready
 echo -e "${YELLOW}⏳ Waiting for services to start...${NC}"
@@ -66,7 +80,7 @@ sleep 10
 
 # Check container status
 echo -e "${YELLOW}📊 Container status:${NC}"
-docker compose -f docker-compose.prod.yml ps
+$DOCKER_COMPOSE -f docker-compose.prod.yml ps
 
 # Show logs
 echo ""
@@ -75,9 +89,9 @@ echo ""
 echo -e "${GREEN}Your application should be available at: https://${DOMAIN}${NC}"
 echo ""
 echo "Useful commands:"
-echo "  - View logs:    docker compose -f docker-compose.prod.yml logs -f"
-echo "  - Stop:         docker compose -f docker-compose.prod.yml down"
-echo "  - Restart:      docker compose -f docker-compose.prod.yml restart"
-echo "  - Shell:        docker compose -f docker-compose.prod.yml exec php sh"
+echo "  - View logs:    $DOCKER_COMPOSE -f docker-compose.prod.yml logs -f"
+echo "  - Stop:         $DOCKER_COMPOSE -f docker-compose.prod.yml down"
+echo "  - Restart:      $DOCKER_COMPOSE -f docker-compose.prod.yml restart"
+echo "  - Shell:        $DOCKER_COMPOSE -f docker-compose.prod.yml exec php sh"
 echo ""
 echo -e "${YELLOW}Note: SSL certificate may take 1-2 minutes to be issued by Let's Encrypt${NC}"

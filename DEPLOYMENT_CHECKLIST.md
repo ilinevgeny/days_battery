@@ -61,6 +61,8 @@ mv .env.prod.local .env.prod
 
 ## Управление
 
+**Примечание:** Замените `docker compose` на `docker-compose` (с дефисом) если используете старую версию.
+
 ```bash
 # Логи
 docker compose -f docker-compose.prod.yml logs -f
