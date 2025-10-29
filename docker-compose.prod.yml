@@ -26,12 +26,14 @@ services:
       - .:/var/www
       - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini
     environment:
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: "postgresql://app:rfaSK45j@postgres:5432/days_battery?serverVersion=16&charset=utf8"
       REDIS_URL: redis://redis:6379
-      APP_ENV: ${APP_ENV:-prod}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      APP_ENV: prod
       APP_SECRET: ${APP_SECRET}
-      SESSION_HANDLER_DSN: ${SESSION_HANDLER_DSN}
-      MESSENGER_TRANSPORT_DSN: ${MESSENGER_TRANSPORT_DSN}
+      SESSION_HANDLER_DSN: redis://redis:6379
+      MESSENGER_TRANSPORT_DSN: redis://redis:6379/messages
     depends_on:
       - postgres
       - redis
