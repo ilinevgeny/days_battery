@@ -1,31 +1,31 @@
 # Days Battery - Production Deployment Guide
 
-Простая инструкция по деплою приложения на VPS с автоматическим SSL от Let's Encrypt.
+Простая инструкция по деплою приложения на VPS без SSL (HTTP на порту 8080).
 
 ## Предварительные требования
 
 - VPS с установленным Docker и Docker Compose
-- Доменное имя с возможностью настройки DNS
+- Доменное имя с возможностью настройки DNS (опционально)
 - SSH доступ к серверу
 
-## Шаг 1: Настройка DNS
+## Шаг 1: Настройка DNS (опционально)
 
-Создайте A-запись для вашего субдомена, указывающую на IP вашего VPS:
+Если хотите использовать доменное имя, создайте A-запись:
 
 ```
 Тип: A
 Имя: battery (или другой субдомен)
 Значение: <IP вашего VPS>
-TTL: 3600 (или по умолчанию)
+TTL: 3600
 ```
 
-Пример: `battery.yourdomain.com` → `123.45.67.89`
+Приложение будет доступно по `http://battery.yourdomain.com:8080`
 
-**Важно:** Дождитесь распространения DNS (обычно 5-15 минут). Проверить можно командой:
+Или можно использовать просто IP: `http://123.45.67.89:8080`
+
+**Проверка DNS:**
 ```bash
 dig battery.yourdomain.com
-# или
-nslookup battery.yourdomain.com
 ```
 
 ## Шаг 2: Подготовка сервера
@@ -60,20 +60,14 @@ nano .env.prod.local
 Заполните следующие значения:
 
 ```env
-# Ваш домен (БЕЗ https://)
-DOMAIN=battery.yourdomain.com
-
-# Email для уведомлений Let's Encrypt
-LETSENCRYPT_EMAIL=your-email@example.com
-
 # Секретный ключ приложения (сгенерируйте новый!)
 APP_SECRET=<сгенерированный секрет>
 
-# URL приложения
-DEFAULT_URI=https://battery.yourdomain.com
+# URL приложения (с портом 8080)
+DEFAULT_URI=http://battery.yourdomain.com:8080
+# Или с IP: DEFAULT_URI=http://123.45.67.89:8080
 
 # Данные БД: Придумайте свой пароль и замените ChangeMe_SecurePassword123
-# Пользователь БД: app (не меняйте)
 DATABASE_URL="postgresql://app:ChangeMe_SecurePassword123@postgres:5432/days_battery?serverVersion=16&charset=utf8"
 ```
 
@@ -89,8 +83,8 @@ php -r "echo bin2hex(random_bytes(32)) . PHP_EOL;"
 
 **Важно:** Пароль БД нужно указать в ДВУХ местах:
 
-1. **В `.env.prod.local`** (который вы сейчас редактируете) - в `DATABASE_URL`
-2. **В `docker-compose.prod.yml`** - в секции `postgres -> environment -> POSTGRES_PASSWORD`
+1. **В `.env.prod.local`** - в `DATABASE_URL`
+2. **В `docker-compose.prod.yml`** - в секции `postgres -> POSTGRES_PASSWORD`
 
 Откройте второй файл:
 
@@ -129,23 +123,25 @@ mv .env.prod.local .env.prod
 ```
 
 Скрипт автоматически:
+- Определит версию Docker Compose (старую или новую)
 - Проверит конфигурацию
 - Остановит старые контейнеры (если есть)
 - Соберет Docker образы
 - Запустит все сервисы
 - Применит миграции БД
-- Настроит SSL через Let's Encrypt
 
 ## Шаг 5: Проверка
 
-После завершения деплоя (1-2 минуты):
+После завершения деплоя (2-3 минуты):
 
-1. Откройте в браузере: `https://battery.yourdomain.com`
-2. Проверьте наличие SSL сертификата (замок в адресной строке)
+1. Откройте в браузере: `http://battery.yourdomain.com:8080` (или `http://IP:8080`)
+2. Приложение должно быть доступно
+
+**Примечание:** Приложение работает на HTTP без SSL из-за того, что порт 443 занят VPN-сервером.
 
 ## Управление приложением
 
-**Примечание:** В примерах ниже используется команда `docker compose` (новый синтаксис). Если у вас установлена старая версия, замените `docker compose` на `docker-compose` (с дефисом). Скрипт `deploy.sh` автоматически определяет правильную команду.
+**Примечание:** В примерах используется `docker compose` (новый синтаксис). Если у вас старая версия, замените на `docker-compose` (с дефисом). Скрипт `deploy.sh` автоматически определяет правильную команду.
 
 ### Просмотр логов
 
@@ -157,7 +153,6 @@ docker compose -f docker-compose.prod.yml logs -f
 ```bash
 docker compose -f docker-compose.prod.yml logs -f php
 docker compose -f docker-compose.prod.yml logs -f nginx
-docker compose -f docker-compose.prod.yml logs -f traefik
 ```
 
 ### Перезапуск
@@ -207,33 +202,16 @@ git pull
 ### Создать бэкап
 
 ```bash
-docker compose -f docker-compose.prod.yml exec postgres pg_dump -U prod_user days_battery > backup_$(date +%Y%m%d_%H%M%S).sql
+docker compose -f docker-compose.prod.yml exec postgres pg_dump -U app days_battery > backup_$(date +%Y%m%d_%H%M%S).sql
 ```
 
 ### Восстановить из бэкапа
 
 ```bash
-cat backup_20250101_120000.sql | docker compose -f docker-compose.prod.yml exec -T postgres psql -U prod_user days_battery
+cat backup_20250101_120000.sql | docker compose -f docker-compose.prod.yml exec -T postgres psql -U app days_battery
 ```
 
 ## Траблшутинг
-
-### SSL сертификат не выдается
-
-1. Убедитесь, что DNS настроен правильно:
-   ```bash
-   dig battery.yourdomain.com
-   ```
-
-2. Проверьте логи Traefik:
-   ```bash
-   docker compose -f docker-compose.prod.yml logs traefik
-   ```
-
-3. Убедитесь, что порты 80 и 443 открыты и не заняты другими процессами:
-   ```bash
-   sudo netstat -tulpn | grep ':80\|:443'
-   ```
 
 ### Приложение не запускается
 
@@ -255,7 +233,7 @@ cat backup_20250101_120000.sql | docker compose -f docker-compose.prod.yml exec 
 ### База данных не доступна
 
 ```bash
-docker compose -f docker-compose.prod.yml exec postgres pg_isready -U prod_user
+docker compose -f docker-compose.prod.yml exec postgres pg_isready -U app
 ```
 
 Если не работает, перезапустите контейнер БД:
@@ -263,17 +241,29 @@ docker compose -f docker-compose.prod.yml exec postgres pg_isready -U prod_user
 docker compose -f docker-compose.prod.yml restart postgres
 ```
 
+### Порт 8080 уже занят
+
+Проверьте что занимает порт:
+```bash
+sudo netstat -tulpn | grep ':8080'
+```
+
+Остановите конфликтующий сервис или измените порт в `docker-compose.prod.yml`:
+```yaml
+nginx:
+  ports:
+    - "8081:80"  # Используйте другой порт
+```
+
+Не забудьте обновить `DEFAULT_URI` в `.env.prod`.
+
 ## Архитектура
 
 ```
 ┌─────────────────┐
 │   Internet      │
 └────────┬────────┘
-         │ :80, :443
-    ┌────▼─────────┐
-    │   Traefik    │ (SSL, routing)
-    └────┬─────────┘
-         │
+         │ :8080 (HTTP)
     ┌────▼─────────┐
     │    Nginx     │ (web server)
     └────┬─────────┘
@@ -287,6 +277,8 @@ docker compose -f docker-compose.prod.yml restart postgres
   └────────┘ └────────┘
 ```
 
+**Примечание:** Traefik и SSL убраны из-за конфликта с VPN на порту 443.
+
 ## Безопасность
 
 **Важные рекомендации:**
@@ -295,31 +287,15 @@ docker compose -f docker-compose.prod.yml restart postgres
 2. Используйте сложные пароли для БД
 3. Регулярно обновляйте Docker образы
 4. Настройте firewall для ограничения доступа по SSH
-5. Включите автоматические обновления безопасности на сервере
+5. Для production желательно настроить SSL (можно использовать другой порт или reverse proxy)
 
-## Дополнительные настройки
+## Добавление SSL в будущем
 
-### Изменение порта PostgreSQL
+Если захотите добавить SSL позже:
 
-По умолчанию PostgreSQL не доступен извне. Если нужен внешний доступ (не рекомендуется для production), добавьте в `docker-compose.prod.yml` в секцию `postgres`:
-
-```yaml
-ports:
-  - "5432:5432"
-```
-
-### Увеличение лимитов памяти PHP
-
-Отредактируйте `docker/php/php.ini`:
-
-```ini
-memory_limit = 512M
-```
-
-Пересоберите контейнеры:
-```bash
-./deploy.sh
-```
+**Вариант 1:** Переместить VPN на другой порт (8443), освободить 443 для Traefik
+**Вариант 2:** Использовать Cloudflare для SSL (бесплатно)
+**Вариант 3:** Настроить отдельный Nginx как reverse proxy с SSL, проксирующий на :8080
 
 ## Поддержка
 
@@ -327,7 +303,8 @@ memory_limit = 512M
 1. Проверьте логи всех сервисов
 2. Убедитесь, что все переменные окружения заполнены
 3. Проверьте статус Docker контейнеров
+4. Убедитесь, что порт 8080 открыт в firewall
 
 ---
 
-**Готово!** Ваше приложение работает на `https://battery.yourdomain.com` с автоматическим SSL.
+**Готово!** Ваше приложение работает на `http://your-domain:8080`

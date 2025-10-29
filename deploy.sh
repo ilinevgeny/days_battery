@@ -42,11 +42,6 @@ if [ -z "$DOMAIN" ] || [ "$DOMAIN" = "YOUR_DOMAIN_HERE" ]; then
     exit 1
 fi
 
-if [ -z "$LETSENCRYPT_EMAIL" ] || [ "$LETSENCRYPT_EMAIL" = "your-email@example.com" ]; then
-    echo -e "${RED}❌ Error: LETSENCRYPT_EMAIL is not set in .env.prod${NC}"
-    exit 1
-fi
-
 if [ -z "$APP_SECRET" ] || [ "$APP_SECRET" = "CHANGE_ME_TO_SECURE_RANDOM_STRING" ]; then
     echo -e "${RED}❌ Error: APP_SECRET is not set properly in .env.prod${NC}"
     echo "Generate a secure secret with: php -r \"echo bin2hex(random_bytes(32));\""
@@ -86,7 +81,7 @@ $DOCKER_COMPOSE -f docker-compose.prod.yml ps
 echo ""
 echo -e "${GREEN}✅ Deployment complete!${NC}"
 echo ""
-echo -e "${GREEN}Your application should be available at: https://${DOMAIN}${NC}"
+echo -e "${GREEN}Your application should be available at: http://${DOMAIN}${NC}"
 echo ""
 echo "Useful commands:"
 echo "  - View logs:    $DOCKER_COMPOSE -f docker-compose.prod.yml logs -f"
@@ -94,4 +89,4 @@ echo "  - Stop:         $DOCKER_COMPOSE -f docker-compose.prod.yml down"
 echo "  - Restart:      $DOCKER_COMPOSE -f docker-compose.prod.yml restart"
 echo "  - Shell:        $DOCKER_COMPOSE -f docker-compose.prod.yml exec php sh"
 echo ""
-echo -e "${YELLOW}Note: SSL certificate may take 1-2 minutes to be issued by Let's Encrypt${NC}"
+echo -e "${YELLOW}Note: Application is running on HTTP (port 80) without SSL${NC}"

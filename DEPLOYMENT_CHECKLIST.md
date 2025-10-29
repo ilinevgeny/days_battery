@@ -1,17 +1,19 @@
 # Production Deployment Checklist
 
-Быстрый чеклист для деплоя. Подробности в [DEPLOYMENT.md](DEPLOYMENT.md).
+Быстрый чеклист для деплоя без SSL. Подробности в [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ## Перед деплоем
 
 - [ ] Docker и Docker Compose установлены на сервере
-- [ ] Открыты порты 80 и 443 на сервере
+- [ ] Порт 8080 свободен (или выбран другой порт)
 - [ ] SSH доступ к серверу работает
 
-## Настройка DNS
+## Настройка DNS (опционально)
 
-- [ ] Создана A-запись для субдомена
-- [ ] DNS распространился (проверить: `dig your-subdomain.yourdomain.com`)
+- [ ] Создана A-запись для субдомена (если используете домен)
+- [ ] DNS распространился: `dig your-subdomain.yourdomain.com`
+
+Или просто используйте IP-адрес сервера.
 
 ## Настройка сервера
 
@@ -31,13 +33,11 @@ nano .env.prod.local
 ```
 
 Заполните:
-- [ ] `DOMAIN` - ваш субдомен (без https://)
-- [ ] `LETSENCRYPT_EMAIL` - ваш email
 - [ ] `APP_SECRET` - сгенерировать: `php -r "echo bin2hex(random_bytes(32));"`
-- [ ] `DEFAULT_URI` - https://ваш-домен
-- [ ] `DATABASE_URL` - придумать и указать безопасный пароль БД (пользователь: `app`)
+- [ ] `DEFAULT_URI` - `http://your-domain:8080` или `http://IP:8080`
+- [ ] `DATABASE_URL` - придумать и указать безопасный пароль БД
 
-**Важно:** Тот же пароль БД нужно указать в `docker-compose.prod.yml`:
+**Важно:** Пароль БД нужно указать в `docker-compose.prod.yml`:
 
 ```bash
 nano docker-compose.prod.yml
@@ -55,8 +55,7 @@ mv .env.prod.local .env.prod
 
 ## После деплоя
 
-- [ ] Приложение доступно по https://your-domain
-- [ ] SSL сертификат установлен (зеленый замок в браузере)
+- [ ] Приложение доступно по `http://your-domain:8080` или `http://IP:8080`
 - [ ] Нет ошибок в логах: `docker compose -f docker-compose.prod.yml logs`
 
 ## Управление
@@ -79,9 +78,10 @@ git pull && ./deploy.sh
 
 ## Траблшутинг
 
-### SSL не работает
+### Порт 8080 уже занят
 ```bash
-docker compose -f docker-compose.prod.yml logs traefik
+sudo netstat -tulpn | grep ':8080'
+# Измените порт в docker-compose.prod.yml на другой (например 8081)
 ```
 
 ### Приложение не запускается
@@ -92,9 +92,11 @@ docker compose -f docker-compose.prod.yml ps
 
 ### База данных недоступна
 ```bash
-docker compose -f docker-compose.prod.yml exec postgres pg_isready
+docker compose -f docker-compose.prod.yml exec postgres pg_isready -U app
 ```
 
 ---
+
+**Примечание:** Приложение работает на HTTP (порт 8080) без SSL из-за конфликта с VPN на порту 443.
 
 Полная документация: [DEPLOYMENT.md](DEPLOYMENT.md)
