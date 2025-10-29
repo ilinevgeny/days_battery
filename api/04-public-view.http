@@ -3,7 +3,7 @@
 # No authentication required - anyone with the hash can view
 
 @baseUrl = http://localhost:8081
-@publicHash = fd8d1ab17c4933af9f2400eaa13f9504
+@publicHash = 00f5e48a2ac0a5eb25b821a4595c28d8
 
 ### View Public Battery
 GET {{baseUrl}}/api/battery/public/{{publicHash}}

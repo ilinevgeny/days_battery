@@ -119,3 +119,14 @@ docker-compose exec php vendor/bin/phpunit tests/Unit/Battery/Domain/Entity/Batt
 # С фильтром по методу
 docker-compose exec php vendor/bin/phpunit --filter testMethodName
 ```
+
+## Production деплой
+
+Подробная инструкция по деплою на production сервер с автоматическим SSL доступна в файле [DEPLOYMENT.md](DEPLOYMENT.md).
+
+Основные шаги:
+1. Настроить DNS (A-запись для субдомена)
+2. Скопировать и заполнить `.env.prod`
+3. Запустить `./deploy.sh`
+
+Приложение автоматически получит SSL сертификат от Let's Encrypt и будет доступно по HTTPS.

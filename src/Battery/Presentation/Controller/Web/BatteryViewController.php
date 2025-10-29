@@ -15,15 +15,14 @@ final class BatteryViewController extends AbstractController
 {
     public function __construct(
         private readonly GetBatteryByHashHandler $getBatteryByHashHandler,
-    ) {
-    }
+    ) {}
 
     #[Route('/battery/{hash}', name: 'battery_public_view', methods: ['GET'])]
     public function publicView(string $hash): Response
     {
         try {
             $battery = $this->getBatteryByHashHandler->handle(
-                new GetBatteryByHashQuery($hash)
+                new GetBatteryByHashQuery($hash),
             );
 
             return $this->render('battery/public_view.html.twig', [
