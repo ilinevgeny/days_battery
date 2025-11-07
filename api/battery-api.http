@@ -1,9 +1,12 @@
 ### Variables
-@baseUrl = http://localhost:8081
-@username = testuser
+#@baseUrl = http://localhost:8081
+@baseUrl = http://trackmyenergy.thankyouforasking.us
+@username = testuser17
 @capacityHours = 12
 
 ### 1. Claim Username (Create User)
+//@no-cookie-jar
+//@no-log
 # @name claimUsername
 POST {{baseUrl}}/api/claim
 Content-Type: application/json
@@ -12,9 +15,17 @@ Content-Type: application/json
   "username": "{{username}}"
 }
 
+> {%
+    const setCookie = response.headers.valueOf("Set-Cookie");
+    const sessionId = setCookie.split(';')[0];
+    client.global.set("sessionCookie", sessionId);
+    console.log("Session Cookie:", sessionId);
+    client.global.set("publicHash", response.body.data.publicHash);
+%}
+
 ### Extract session cookie and publicHash from response
-@sessionCookie = {{claimUsername.response.headers.Set-Cookie}}
-@publicHash = {{claimUsername.response.body.$.data.publicHash}}
+#@sessionCookie = {{claimUsername.response.headers.Set-Cookie}}
+#@publicHash = {{claimUsername.response.body.data.publicHash}}
 
 ### 2. Start Battery Session
 # @name startSession
@@ -23,15 +34,23 @@ Cookie: {{sessionCookie}}
 
 ### 3. Get Battery Status
 # @name getStatus
+// @no-cookie-jar
 GET {{baseUrl}}/api/battery/status
 Cookie: {{sessionCookie}}
 
+> {%
+    console.log("Session Cookie:", client.global.get("sessionCookie"));
+    console.log("Public Hash:", client.global.get("publicHash"));
+%}
 ### 4. Stop Battery Session
 # @name stopSession
 POST {{baseUrl}}/api/battery/stop
 Cookie: {{sessionCookie}}
 
+
 ### 5. Get Battery Status After Stop
+//@sessionCookie = PHPSESSID=3das7sh5lpcu2rv7rf094kkq5h
+//@no-log
 GET {{baseUrl}}/api/battery/status
 Cookie: {{sessionCookie}}
 

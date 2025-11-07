@@ -17,8 +17,7 @@ final readonly class ClaimUsernameHandler
     public function __construct(
         private UserRepositoryInterface $userRepository,
         private BatteryRepositoryInterface $batteryRepository,
-    ) {
-    }
+    ) {}
 
     public function handle(ClaimUsernameCommand $command): ClaimUsernameResultDTO
     {
